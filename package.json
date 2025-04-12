@@ -1,0 +1,26 @@
+{
+  "name": "youarewe-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "deploy:web": "cd apps/web && vercel --prod",
+    "deploy:api": "cd apps/api && railway up"
+  },
+  "devDependencies": {
+    "eslint": "^8.40.0",
+    "prettier": "^2.8.8",
+    "turbo": "^1.10.0",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
