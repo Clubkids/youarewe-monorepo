@@ -1,58 +1,33 @@
 # Perth Music Community Forum
 
-A desktop-focused music community forum for Perth using a monorepo architecture. The tech stack includes Next.js for the frontend, Strapi for the backend, and PostgreSQL for the database.
+A desktop-focused music community forum for Perth using Next.js, Strapi, and PostgreSQL.
 
-## Architecture
+## Project Structure
 
-This project uses a Turborepo-powered monorepo structure:
+This project uses a monorepo architecture with Turborepo:
 
-youarewe-monorepo/
-├── package.json         # Root package.json for monorepo config
-├── turbo.json           # Turborepo configuration
-├── packages/            # Shared code packages
-│   ├── ui/              # Shared UI components
-│   ├── utils/           # Shared utilities
-│   └── api-client/      # API client for Strapi
-├── apps/
-│   ├── web/             # Next.js frontend
-│   └── api/             # Strapi backend
-└── .env                 # Shared environment variables
+- `apps/web`: Next.js frontend
+- `apps/api`: Strapi backend
+- `packages/ui`: Shared UI components
+- `packages/utils`: Shared utilities
+- `packages/api-client`: Shared API client
 
 ## Getting Started
 
-### Prerequisites
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env` and update variables
+4. Start development server: `npm run dev`
 
-- Node.js (>= 16.0.0)
-- PostgreSQL
-- Git
+## Development Commands
 
-### Installation
+- `npm run dev`: Start development servers
+- `npm run build`: Build all packages and applications
+- `npm run start`: Start all applications
+- `npm run lint`: Run linting
+- `npm run format`: Format code with Prettier
 
-1. Clone the repository:
-   git clone https://github.com/clubkids/youarewe-monorepo.git
-   cd youarewe-monorepo
+## Deployment
 
-2. Install dependencies:
-   npm install
-
-3. Set up environment variables:
-   cp .env.example .env
-   # Edit .env with your configuration
-
-4. Start the development server:
-   npm run dev
-
-## Features
-
-- Music-centric forum for discussions
-- Music embedding and sharing
-- Live chat functionality
-- User profiles with music preferences
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- Frontend: `npm run deploy:web`
+- Backend: `npm run deploy:api`
