@@ -1,10 +1,16 @@
 {
   "name": "youarewe-monorepo",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/@strapi/**",
+      "**/@strapi/strapi"
+    ]
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -15,12 +21,23 @@
     "deploy:api": "cd apps/api && railway up"
   },
   "devDependencies": {
-    "eslint": "^8.40.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.2",
     "prettier": "^2.8.8",
-    "turbo": "^1.10.0",
-    "typescript": "^5.0.4"
+    "turbo": "^1.13.4",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.72.2",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.487.0",
+    "next-auth": "^4.24.11",
+    "socket.io": "^4.8.1"
   }
 }
