@@ -369,76 +369,6 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiGenreGenre extends Struct.CollectionTypeSchema {
-  collectionName: 'genres';
-  info: {
-    displayName: 'genre';
-    pluralName: 'genres';
-    singularName: 'genre';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::genre.genre'> &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.String & Schema.Attribute.Required;
-    publishedAt: Schema.Attribute.DateTime;
-    slug: Schema.Attribute.UID<'name'>;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    users: Schema.Attribute.Relation<
-      'manyToMany',
-      'api::user-profile.user-profile'
-    >;
-  };
-}
-
-export interface ApiUserProfileUserProfile extends Struct.CollectionTypeSchema {
-  collectionName: 'user_profiles';
-  info: {
-    displayName: 'UserProfile';
-    pluralName: 'user-profiles';
-    singularName: 'user-profile';
-  };
-  options: {
-    draftAndPublish: true;
-  };
-  attributes: {
-    bio: Schema.Attribute.Text;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    favouriteGenres: Schema.Attribute.Relation<
-      'manyToMany',
-      'api::genre.genre'
-    >;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::user-profile.user-profile'
-    > &
-      Schema.Attribute.Private;
-    location: Schema.Attribute.String;
-    publishedAt: Schema.Attribute.DateTime;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
-      Schema.Attribute.Private;
-    user: Schema.Attribute.Relation<
-      'oneToOne',
-      'plugin::users-permissions.user'
-    >;
-    userType: Schema.Attribute.Enumeration<['member', 'moderator', 'admin']> &
-      Schema.Attribute.DefaultTo<'member'>;
-  };
-}
-
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -919,10 +849,6 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
-    profile: Schema.Attribute.Relation<
-      'oneToOne',
-      'api::user-profile.user-profile'
-    >;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
@@ -952,8 +878,6 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::genre.genre': ApiGenreGenre;
-      'api::user-profile.user-profile': ApiUserProfileUserProfile;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;
