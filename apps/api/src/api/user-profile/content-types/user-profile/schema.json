@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_profiles",
+  "info": {
+    "singularName": "user-profile",
+    "pluralName": "user-profiles",
+    "displayName": "UserProfile"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "bio": {
+      "type": "text"
+    },
+    "location": {
+      "type": "string"
+    },
+    "userType": {
+      "type": "enumeration",
+      "enum": [
+        "member",
+        "moderator",
+        "admin"
+      ],
+      "default": "member"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "profile"
+    },
+    "favouriteGenres": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::genre.genre",
+      "inversedBy": "users"
+    }
+  }
+}
