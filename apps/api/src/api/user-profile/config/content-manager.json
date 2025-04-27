@@ -1,0 +1,65 @@
+{
+    "uid": "api::user-profile.user-profile",
+    "settings": {
+      "mainField": "id",
+      "defaultSortBy": "id",
+      "defaultSortOrder": "ASC"
+    },
+    "metadatas": {
+      "id": {
+        "edit": {},
+        "list": {
+          "label": "Id",
+          "searchable": true,
+          "sortable": true
+        }
+      },
+      "user": {
+        "edit": {
+          "label": "User",
+          "description": "The associated user",
+          "placeholder": "Select a user",
+          "visible": true,
+          "editable": true
+        },
+        "list": {
+          "label": "User",
+          "searchable": true,
+          "sortable": true
+        }
+      }
+    },
+    "layouts": {
+      "list": ["id", "user", "userType", "createdAt"],
+      "edit": [
+        [
+          {
+            "name": "user",
+            "size": 6
+          },
+          {
+            "name": "userType",
+            "size": 6
+          }
+        ],
+        [
+          {
+            "name": "bio",
+            "size": 12
+          }
+        ],
+        [
+          {
+            "name": "location",
+            "size": 6
+          }
+        ],
+        [
+          {
+            "name": "favouriteGenres",
+            "size": 12
+          }
+        ]
+      ]
+    }
+  }

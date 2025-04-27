@@ -4,11 +4,13 @@
   "info": {
     "singularName": "user-profile",
     "pluralName": "user-profiles",
-    "displayName": "UserProfile"
+    "displayName": "UserProfile",
+    "description": "Extended user profile with music preferences"
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
+  "pluginOptions": {},
   "attributes": {
     "bio": {
       "type": "text"
@@ -18,11 +20,7 @@
     },
     "userType": {
       "type": "enumeration",
-      "enum": [
-        "member",
-        "moderator",
-        "admin"
-      ],
+      "enum": ["member", "moderator", "admin"],
       "default": "member"
     },
     "user": {
@@ -35,6 +33,18 @@
       "relation": "manyToMany",
       "target": "api::genre.genre",
       "inversedBy": "users"
+    },
+    "threads": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::thread.thread",
+      "mappedBy": "author"
+    },
+    "posts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::post.post",
+      "mappedBy": "author"
     }
   }
 }

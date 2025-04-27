@@ -1,0 +1,50 @@
+{
+    "kind": "collectionType",
+    "collectionName": "music",
+    "info": {
+      "singularName": "music",
+      "pluralName": "musics",
+      "displayName": "Music",
+      "description": "Music entries shared in the forum"
+    },
+    "options": {
+      "draftAndPublish": false
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "title": {
+        "type": "string",
+        "required": true
+      },
+      "artist": {
+        "type": "string",
+        "required": true
+      },
+      "album": {
+        "type": "string"
+      },
+      "year": {
+        "type": "integer"
+      },
+      "embedType": {
+        "type": "enumeration",
+        "enum": ["spotify", "youtube", "soundcloud", "bandcamp", "other"],
+        "required": true
+      },
+      "embedId": {
+        "type": "string",
+        "required": true
+      },
+      "genres": {
+        "type": "relation",
+        "relation": "manyToMany",
+        "target": "api::genre.genre",
+        "inversedBy": "music"
+      },
+      "uploadedBy": {
+        "type": "relation",
+        "relation": "manyToOne",
+        "target": "plugin::users-permissions.user"
+      }
+    }
+  }
