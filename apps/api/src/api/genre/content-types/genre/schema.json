@@ -26,6 +26,12 @@
       "relation": "manyToMany",
       "target": "api::user-profile.user-profile",
       "mappedBy": "favouriteGenres"
+    },
+    "music": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::music.music",
+      "mappedBy": "genres"
     }
   }
 }

@@ -1,0 +1,37 @@
+{
+    "kind": "collectionType",
+    "collectionName": "posts",
+    "info": {
+      "singularName": "post",
+      "pluralName": "posts",
+      "displayName": "Post",
+      "description": "Forum posts/replies"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "content": {
+        "type": "richtext",
+        "required": true
+      },
+      "author": {
+        "type": "relation",
+        "relation": "manyToOne",
+        "target": "api::user-profile.user-profile",
+        "inversedBy": "posts"
+      },
+      "thread": {
+        "type": "relation",
+        "relation": "manyToOne",
+        "target": "api::thread.thread",
+        "inversedBy": "posts"
+      },
+      "music": {
+        "type": "relation",
+        "relation": "oneToOne",
+        "target": "api::music.music"
+      }
+    }
+  }
