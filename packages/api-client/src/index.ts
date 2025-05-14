@@ -1,6 +1,9 @@
-/**
- * API Client Library
- * Exports the Strapi API client for the Perth Music Community Forum
- */
+// Export all client types
+export * from './types';
+export * from './baseClient';
+export * from './browserClient';
+export * from './serverClient';
 
-export * from './client';
+// Default export for browser environments
+import { createBrowserClient } from './browserClient';
+export const strapiClient = createBrowserClient();
