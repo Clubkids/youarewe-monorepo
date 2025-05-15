@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font definitions based on available formats */
+@font-face {
+  font-family: 'CSElijah';
+  src: url('/fonts/CSElijah.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'EskapadeFraktur-Black';
+  src: url('/fonts/EskapadeFraktur-Black.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sax Mono';
+  src: url('/fonts/SaxMono.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: 'Sax Mono', monospace;
+}
+
+h1, h2, h3 {
+  font-family: 'EskapadeFraktur-Black', sans-serif;
+}
