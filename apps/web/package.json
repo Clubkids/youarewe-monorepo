@@ -17,6 +17,7 @@
   "packageManager": "pnpm@10.8.0",
   "dependencies": {
     "@tanstack/react-query": "^5.72.2",
+    "@youarewe/api-client": "workspace:^",
     "next": "^15.3.2",
     "next-auth": "^4.24.11",
     "react": "^19.1.0",
