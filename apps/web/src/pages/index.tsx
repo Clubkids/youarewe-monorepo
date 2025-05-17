@@ -10,6 +10,17 @@ export default function LandingPage() {
   const [showOk, setShowOk] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Add no-scroll class to prevent scrolling
+  useEffect(() => {
+    // Add the no-scroll class to the body
+    document.body.classList.add('no-scroll');
+    
+    // Clean up when component unmounts
+    return () => {
+      document.body.classList.remove('no-scroll');
+    };
+  }, []);
+
   // Load manifest.json and select random images
   useEffect(() => {
     fetch('/images/manifest.json')
@@ -112,7 +123,15 @@ export default function LandingPage() {
         style={{
           backgroundColor: 'black',
           height: '100vh',
-          position: 'relative',
+          width: '100vw',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           color: 'white',
           fontFamily: 'initial'
         }}

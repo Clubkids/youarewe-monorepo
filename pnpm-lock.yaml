@@ -94,6 +94,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.72.2
         version: 5.73.3(react@19.1.0)
+      '@youarewe/api-client':
+        specifier: workspace:^
+        version: link:../../packages/api-client
       next:
         specifier: ^15.3.2
         version: 15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -146,19 +149,7 @@ importers:
       axios:
         specifier: ^1.8.4
         version: 1.8.4(debug@4.3.4)
-      next-auth:
-        specifier: ^4.24.0
-        version: 4.24.11(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     devDependencies:
-      '@types/node':
-        specifier: ^18.19.86
-        version: 18.19.86
-      eslint:
-        specifier: ^8.40.0
-        version: 8.57.1
-      eslint-config-custom:
-        specifier: '*'
-        version: 0.0.0(eslint@8.57.1)(typescript@5.8.3)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3

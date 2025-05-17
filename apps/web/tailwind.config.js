@@ -15,6 +15,8 @@ module.exports = {
         'elijah': ['CSElijah', 'serif'],
         'eskepade': ['EskapadeFraktur-Black', 'sans-serif'],
         'sax-mono': ['Sax Mono', 'monospace'],
+        'sportage': ['Sportage-Demo', 'sans-serif'],
+      },
       },
     },
   },
