@@ -5,7 +5,8 @@
 /* Font definitions based on available formats */
 @font-face {
   font-family: 'CSElijah';
-  src: url('/fonts/CSElijah.ttf') format('truetype');
+  src: url('/fonts/CSElijah-Regular.woff2') format('woff2'),
+       url('/fonts/CSElijah-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -13,7 +14,8 @@
 
 @font-face {
   font-family: 'EskapadeFraktur-Black';
-  src: url('/fonts/EskapadeFraktur-Black.ttf') format('truetype');
+  src: url('/fonts/EskapadeFraktur-Black.woff2') format('woff2'),
+       url('/fonts/EskapadeFraktur-Black.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -21,7 +23,8 @@
 
 @font-face {
   font-family: 'Sax Mono';
-  src: url('/fonts/SaxMono.ttf') format('truetype');
+  src: url('/fonts/saxMono.woff2') format('woff2'),
+       url('/fonts/saxMono.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
