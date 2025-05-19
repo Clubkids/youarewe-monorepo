@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-// Define the types specifically for your Strapi response format
+// Define the types for your specific category format
 interface StrapiCategory {
   id: string | number;
   documentId?: string;
@@ -11,46 +11,70 @@ interface StrapiCategory {
   order?: number;
   createdAt?: string;
   updatedAt?: string;
+  publishedAt?: string;
   threads?: {
     data?: any[];
   };
 }
 
 interface CategoryListProps {
-  categories: any[];
+  categories: any; // Can be array or object or undefined
   isLoading: boolean;
   error: { message: string } | null;
 }
 
-// Special function to convert the Strapi v5 response format to our expected format
-const processCategoryData = (categories: any[]): StrapiCategory[] => {
-  if (!categories || !Array.isArray(categories)) {
-    console.warn('processCategoryData received invalid input:', categories);
+/**
+ * Processes category data to handle different response formats.
+ * Updated to specifically handle the flat array format seen in your API response.
+ */
+const processCategoryData = (categoriesData: any): StrapiCategory[] => {
+  // Handle undefined, null, or empty input
+  if (!categoriesData) {
+    console.warn('processCategoryData received invalid input:', categoriesData);
     return [];
   }
 
-  // Check if data is already in the right format (direct array of categories)
-  if (categories.length > 0 && 'name' in categories[0]) {
-    return categories;
+  // Handle already flattened array format like in your paste
+  if (Array.isArray(categoriesData)) {
+    // Check if it has the format from your example JSON (with direct name property)
+    if (categoriesData.length > 0 && 'name' in categoriesData[0]) {
+      console.log("Processing direct category array format");
+      return categoriesData;
+    }
+    
+    // Handle Strapi format with attributes
+    if (categoriesData.length > 0 && 'attributes' in categoriesData[0]) {
+      return categoriesData.map(item => ({
+        id: item.id,
+        ...(item.attributes || {})
+      }));
+    }
   }
-
-  // Handle Strapi v5 format where properties are direct on the object (not in attributes)
-  return categories.map(category => ({
-    id: category.id,
-    documentId: category.documentId,
-    name: category.name,
-    slug: category.slug,
-    description: category.description,
-    order: category.order,
-    createdAt: category.createdAt,
-    updatedAt: category.updatedAt,
-    threads: category.threads
-  }));
+  
+  // Handle Strapi v5 format with data property
+  if (categoriesData.data && Array.isArray(categoriesData.data)) {
+    return categoriesData.data.map(item => {
+      // Check if it has attributes
+      if (item.attributes) {
+        return {
+          id: item.id,
+          ...(item.attributes || {})
+        };
+      } else {
+        // Already flattened
+        return item;
+      }
+    });
+  }
+  
+  // Fallback for unexpected format
+  console.warn('Unexpected data format in processCategoryData:', categoriesData);
+  return Array.isArray(categoriesData) ? categoriesData : [];
 };
 
 /**
  * CategoryList component displays all forum categories in a list.
- * Updated to handle Strapi v5 response format directly.
+ * Updated to handle flat array format from API response.
  */
 const CategoryList: React.FC<CategoryListProps> = ({ categories, isLoading, error }) => {
   // Show loading state with skeleton UI
@@ -96,6 +120,10 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, isLoading, erro
   // Process the categories data to match our expected format
   const processedCategories = processCategoryData(categories);
   
+  // Debug logging to help troubleshoot format issues
+  console.log('Original categories:', categories);
+  console.log('Processed categories:', processedCategories);
+  
   // Show empty state with helpful message
   if (!processedCategories || processedCategories.length === 0) {
     return (
@@ -132,7 +160,8 @@ const CategoryList: React.FC<CategoryListProps> = ({ categories, isLoading, erro
           threads
         } = category;
         
-        const threadCount = threads?.data?.length || 0;
+        // Handle both formats of thread count
+        const threadCount = threads?.data?.length || threads?.length || 0;
         
         return (
           <div 

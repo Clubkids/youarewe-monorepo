@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
@@ -9,8 +9,32 @@ import FeaturedThreads from '@/components/forums/FeaturedThreads';
 import RecentActivity from '@/components/forums/RecentActivity';
 import CategoryList from '@/components/forums/CategoryList';
 
-// Get API URL from environment
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337';
+// Set the correct API URL - ensure this is the correct server IP
+const API_URL = 'http://134.199.169.23:1337';
+
+/**
+ * Helper function to ensure we have a usable array from API responses
+ * regardless of the format returned
+ */
+const ensureArray = (data: any): any[] => {
+  if (!data) {
+    return [];
+  }
+  
+  // If it's already an array, return it
+  if (Array.isArray(data)) {
+    return data;
+  }
+  
+  // If it has a data property that's an array, return that
+  if (data.data && Array.isArray(data.data)) {
+    return data.data;
+  }
+  
+  // Return empty array as fallback
+  console.warn('Unable to extract array from data:', data);
+  return [];
+};
 
 /**
  * MessageBoard is the main homepage component for the forum section
@@ -19,7 +43,20 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337';
 const MessageBoard: React.FC = () => {
   const { data: session } = useSession();
   
-  // Test API connection (using standard fetch without extra wrappers)
+  // Direct state for data fetching
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<null | { message: string }>(null);
+  
+  const [featuredThreads, setFeaturedThreads] = useState<any[]>([]);
+  const [featuredThreadsLoading, setFeaturedThreadsLoading] = useState(true);
+  const [featuredThreadsError, setFeaturedThreadsError] = useState<null | { message: string }>(null);
+  
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [recentActivityLoading, setRecentActivityLoading] = useState(true);
+  const [recentActivityError, setRecentActivityError] = useState<null | { message: string }>(null);
+  
+  // Test API connection
   const testQuery = useQuery({
     queryKey: ['apiTest'],
     queryFn: async () => {
@@ -28,7 +65,6 @@ const MessageBoard: React.FC = () => {
       try {
         const response = await fetch(`${API_URL}/api/categories`);
         
-        // Basic error handling without using Error constructor
         if (!response.ok) {
           console.error(`API error: ${response.status} ${response.statusText}`);
           return { error: `API request failed: ${response.status} ${response.statusText}` };
@@ -39,61 +75,120 @@ const MessageBoard: React.FC = () => {
         return data;
       } catch (err) {
         console.error('Fetch error:', err);
-        // Return error info as object, without constructing Error
         return { error: String(err) };
       }
     }
   });
   
-  // Helper function for making fetch requests that keeps errors visible
-  const makeApiRequest = async (endpoint: string) => {
-    try {
-      console.log(`Fetching: ${API_URL}${endpoint}`);
-      const response = await fetch(`${API_URL}${endpoint}`);
-      
-      if (!response.ok) {
-        // This will preserve the error dialog in browser dev tools
-        console.error(`API error: ${response.status} ${response.statusText}`);
-        return { error: `API request failed: ${response.status} ${response.statusText}` };
-      }
-      
-      return await response.json();
-    } catch (err) {
-      console.error('Fetch error:', err);
-      return { error: String(err) };
-    }
-  };
-  
   // Check if test query returned an error
   const hasTestError = testQuery.data && 'error' in testQuery.data;
   
-  // Fetch featured threads with updated query format
-  const featuredThreadsQuery = useQuery({
-    queryKey: ['featuredThreads'],
-    // Using populate=* to get all relations
-    queryFn: () => makeApiRequest('/api/threads?populate=*&filters[isPinned]=true&sort[0]=createdAt:desc&pagination[limit]=5'),
-    enabled: !hasTestError && !testQuery.isLoading,
-  });
-
-  // Fetch recent activity with updated query format
-  const recentActivityQuery = useQuery({
-    queryKey: ['recentActivity'],
-    // Using populate=* to get all relations
-    queryFn: () => makeApiRequest('/api/posts?populate=*&sort[0]=createdAt:desc&pagination[limit]=10'),
-    enabled: !hasTestError && !testQuery.isLoading,
-  });
-
-  // Fetch categories with proper Strapi v5 syntax (this one already works)
-  const categoriesQuery = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => makeApiRequest('/api/categories?populate=threads&sort[order]=asc'),
-    enabled: !hasTestError && !testQuery.isLoading,
-  });
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (hasTestError) return;
+      
+      try {
+        console.log("Fetching categories...");
+        const categoriesUrl = `${API_URL}/api/categories?populate=threads`;
+        console.log("Categories URL:", categoriesUrl);
+        
+        const response = await fetch(categoriesUrl);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log("Categories data:", data);
+        
+        // Process the categories data based on format
+        const processedData = ensureArray(data);
+        console.log("Processed categories:", processedData);
+        setCategories(processedData);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategoriesError({ message: error instanceof Error ? error.message : String(error) });
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+    
+    fetchCategories();
+  }, [hasTestError, testQuery.data]);
+  
+  // Fetch featured threads
+  useEffect(() => {
+    const fetchFeaturedThreads = async () => {
+      if (hasTestError) return;
+      
+      try {
+        console.log("Fetching featured threads...");
+        const url = `${API_URL}/api/threads?populate=*&filters[isPinned]=true&sort[0]=createdAt:desc&pagination[limit]=5`;
+        console.log("Featured threads URL:", url);
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log("Featured threads data:", data);
+        
+        // Process the data
+        const processedData = ensureArray(data);
+        console.log("Processed featured threads:", processedData);
+        setFeaturedThreads(processedData);
+      } catch (error) {
+        console.error("Error fetching featured threads:", error);
+        setFeaturedThreadsError({ message: error instanceof Error ? error.message : String(error) });
+      } finally {
+        setFeaturedThreadsLoading(false);
+      }
+    };
+    
+    fetchFeaturedThreads();
+  }, [hasTestError, testQuery.data]);
+  
+  // Fetch recent activity
+  useEffect(() => {
+    const fetchRecentActivity = async () => {
+      if (hasTestError) return;
+      
+      try {
+        console.log("Fetching recent activity...");
+        const url = `${API_URL}/api/posts?populate=*&sort[0]=createdAt:desc&pagination[limit]=10`;
+        console.log("Recent activity URL:", url);
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log("Recent activity data:", data);
+        
+        // Process the data
+        const processedData = ensureArray(data);
+        console.log("Processed recent activity:", processedData);
+        setRecentActivity(processedData);
+      } catch (error) {
+        console.error("Error fetching recent activity:", error);
+        setRecentActivityError({ message: error instanceof Error ? error.message : String(error) });
+      } finally {
+        setRecentActivityLoading(false);
+      }
+    };
+    
+    fetchRecentActivity();
+  }, [hasTestError, testQuery.data]);
 
   // Display global API error if API test fails
   if (hasTestError || testQuery.isError) {
     const errorMessage = hasTestError 
-      ? testQuery.data.error 
+      ? (testQuery.data?.error || 'Unknown error')
       : testQuery.error instanceof Error 
         ? testQuery.error.message 
         : String(testQuery.error);
@@ -127,22 +222,6 @@ const MessageBoard: React.FC = () => {
     );
   }
 
-  // Function to check if a query result has an error
-  const hasQueryError = (query: any) => {
-    return query.data && 'error' in query.data;
-  };
-
-  // Function to get the error message from a query
-  const getQueryErrorMessage = (query: any) => {
-    if (query.isError) {
-      return query.error instanceof Error ? query.error.message : String(query.error);
-    }
-    if (query.data && 'error' in query.data) {
-      return query.data.error;
-    }
-    return 'Unknown error';
-  };
-
   return (
     <>
       <Head>
@@ -158,27 +237,27 @@ const MessageBoard: React.FC = () => {
             <section>
               <h2 className="text-2xl font-bold mb-6">Featured Discussions</h2>
               <FeaturedThreads 
-                threads={!hasQueryError(featuredThreadsQuery) ? featuredThreadsQuery.data?.data || [] : []} 
-                isLoading={featuredThreadsQuery.isLoading}
-                error={hasQueryError(featuredThreadsQuery) ? { message: featuredThreadsQuery.data.error } : null}
+                threads={featuredThreads}
+                isLoading={featuredThreadsLoading}
+                error={featuredThreadsError}
               />
             </section>
             
             <section>
               <h2 className="text-2xl font-bold mb-6">Categories</h2>
               <CategoryList 
-                categories={!hasQueryError(categoriesQuery) ? categoriesQuery.data?.data || [] : []}
-                isLoading={categoriesQuery.isLoading}
-                error={hasQueryError(categoriesQuery) ? { message: categoriesQuery.data.error } : null}
+                categories={categories}
+                isLoading={categoriesLoading}
+                error={categoriesError}
               />
             </section>
             
             <section>
               <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
               <RecentActivity 
-                activity={!hasQueryError(recentActivityQuery) ? recentActivityQuery.data?.data || [] : []}
-                isLoading={recentActivityQuery.isLoading}
-                error={hasQueryError(recentActivityQuery) ? { message: recentActivityQuery.data.error } : null}
+                activity={recentActivity}
+                isLoading={recentActivityLoading}
+                error={recentActivityError}
               />
             </section>
           </div>
@@ -206,27 +285,33 @@ const MessageBoard: React.FC = () => {
               </section>
             )}
             
-            {/* Debugging section with basic info only */}
+            {/* Debugging section */}
             <section>
               <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 text-sm">
                 <h3 className="font-semibold mb-2">Debug Info</h3>
                 <div>
                   <p>API URL: {API_URL}</p>
                   <p>API Status: {hasTestError ? '❌ Error' : '✅ Connected'}</p>
-                  <p>Featured Threads: {
-                    featuredThreadsQuery.isLoading ? '⏳ Loading' : 
-                    hasQueryError(featuredThreadsQuery) ? '❌ Error' : 
-                    '✅ Loaded'
-                  }</p>
                   <p>Categories: {
-                    categoriesQuery.isLoading ? '⏳ Loading' : 
-                    hasQueryError(categoriesQuery) ? '❌ Error' : 
-                    '✅ Loaded'
+                    categoriesLoading 
+                      ? '⏳ Loading' 
+                      : categoriesError 
+                        ? '❌ Error' 
+                        : `✅ Loaded (${categories?.length || 0} items)`
+                  }</p>
+                  <p>Featured Threads: {
+                    featuredThreadsLoading
+                      ? '⏳ Loading' 
+                      : featuredThreadsError 
+                        ? '❌ Error' 
+                        : `✅ Loaded (${featuredThreads?.length || 0} items)`
                   }</p>
                   <p>Recent Activity: {
-                    recentActivityQuery.isLoading ? '⏳ Loading' : 
-                    hasQueryError(recentActivityQuery) ? '❌ Error' : 
-                    '✅ Loaded'
+                    recentActivityLoading
+                      ? '⏳ Loading' 
+                      : recentActivityError 
+                        ? '❌ Error' 
+                        : `✅ Loaded (${recentActivity?.length || 0} items)`
                   }</p>
                 </div>
                 
@@ -235,37 +320,28 @@ const MessageBoard: React.FC = () => {
                   <h4 className="font-semibold mb-2">Error Details:</h4>
                   {hasTestError && (
                     <div className="mb-2 p-2 bg-red-100 text-xs rounded overflow-auto max-h-20">
-                      <strong>API Test:</strong> {testQuery.data.error}
+                      <strong>API Test:</strong> {testQuery.data?.error || 'Unknown error'}
                     </div>
                   )}
-                  {hasQueryError(featuredThreadsQuery) && (
+                  {categoriesError && (
                     <div className="mb-2 p-2 bg-red-100 text-xs rounded overflow-auto max-h-20">
-                      <strong>Featured Threads:</strong> {featuredThreadsQuery.data.error}
+                      <strong>Categories:</strong> {categoriesError.message}
                     </div>
                   )}
-                  {hasQueryError(categoriesQuery) && (
+                  {featuredThreadsError && (
                     <div className="mb-2 p-2 bg-red-100 text-xs rounded overflow-auto max-h-20">
-                      <strong>Categories:</strong> {categoriesQuery.data.error}
+                      <strong>Featured Threads:</strong> {featuredThreadsError.message}
                     </div>
                   )}
-                  {hasQueryError(recentActivityQuery) && (
+                  {recentActivityError && (
                     <div className="mb-2 p-2 bg-red-100 text-xs rounded overflow-auto max-h-20">
-                      <strong>Recent Activity:</strong> {recentActivityQuery.data.error}
+                      <strong>Recent Activity:</strong> {recentActivityError.message}
                     </div>
                   )}
-                  {/* Additional error detail instructions */}
                   <p className="text-xs mt-2">
                     For more detailed errors, check the browser's console (F12 &gt; Console tab)
                   </p>
                 </div>
-                
-                {/* Network security warning (for development only) */}
-                {process.env.NODE_ENV !== 'production' && (
-                  <div className="mt-4 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md text-xs">
-                    <strong>Note:</strong> Chrome security warnings about "private network requests"
-                    can be safely ignored during local development.
-                  </div>
-                )}
               </div>
             </section>
           </div>

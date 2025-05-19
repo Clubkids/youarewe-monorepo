@@ -38,10 +38,34 @@ interface Thread {
 }
 
 interface FeaturedThreadsProps {
-  threads: Thread[];
+  threads: Thread[] | { data: Thread[] } | any; // Accept both array and Strapi response format
   isLoading: boolean;
   error: Error | null;
 }
+
+/**
+ * Helper function to ensure we have a usable array of threads
+ * regardless of input format
+ */
+const getThreadsArray = (threads: any): Thread[] => {
+  if (!threads) {
+    return [];
+  }
+  
+  // If it's already an array, use it
+  if (Array.isArray(threads)) {
+    return threads;
+  }
+  
+  // If it's a Strapi response with data property
+  if (threads.data && Array.isArray(threads.data)) {
+    return threads.data;
+  }
+  
+  // Fallback to empty array if we can't extract threads
+  console.warn('FeaturedThreads: Unable to extract threads from data', threads);
+  return [];
+};
 
 /**
  * Safely get nested property values with fallbacks
@@ -103,7 +127,14 @@ const FeaturedThreads: React.FC<FeaturedThreadsProps> = ({ threads, isLoading, e
     );
   }
 
-  if (!threads || threads.length === 0) {
+  // Convert threads to array format
+  const threadsArray = getThreadsArray(threads);
+  
+  // Debug logging
+  console.log('Original threads:', threads);
+  console.log('Processed threads:', threadsArray);
+
+  if (!threadsArray || threadsArray.length === 0) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md text-center">
         <p className="text-gray-500 dark:text-gray-400">No featured threads yet.</p>
@@ -113,7 +144,7 @@ const FeaturedThreads: React.FC<FeaturedThreadsProps> = ({ threads, isLoading, e
 
   return (
     <div className="space-y-4">
-      {threads.map((thread) => {
+      {threadsArray.map((thread) => {
         // Safe accessors for potentially missing data
         const title = safeGet(() => thread.attributes.title, 'Untitled Thread');
         const content = safeGet(() => thread.attributes.content, '');

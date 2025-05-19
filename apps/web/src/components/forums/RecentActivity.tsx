@@ -40,10 +40,34 @@ interface Post {
 }
 
 interface RecentActivityProps {
-  activity: Post[];
+  activity: Post[] | { data: Post[] } | any; // Accept both array and Strapi response format
   isLoading: boolean;
   error: Error | null;
 }
+
+/**
+ * Helper function to ensure we have a usable array of posts
+ * regardless of input format
+ */
+const getPostsArray = (activity: any): Post[] => {
+  if (!activity) {
+    return [];
+  }
+  
+  // If it's already an array, use it
+  if (Array.isArray(activity)) {
+    return activity;
+  }
+  
+  // If it's a Strapi response with data property
+  if (activity.data && Array.isArray(activity.data)) {
+    return activity.data;
+  }
+  
+  // Fallback to empty array if we can't extract posts
+  console.warn('RecentActivity: Unable to extract posts from activity data', activity);
+  return [];
+};
 
 /**
  * RecentActivity component displays a list of recent posts
@@ -76,7 +100,10 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activity, isLoading, er
     );
   }
 
-  if (!activity || activity.length === 0) {
+  // Convert activity to array format
+  const postsArray = getPostsArray(activity);
+
+  if (postsArray.length === 0) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md text-center">
         <p className="text-gray-500 dark:text-gray-400">No recent activity.</p>
@@ -87,41 +114,49 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activity, isLoading, er
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        {activity.map((post) => {
+        {postsArray.map((post) => {
+          // Make sure we can safely access nested properties
+          const username = post?.attributes?.author?.data?.attributes?.username || 'Unknown';
+          const threadTitle = post?.attributes?.thread?.data?.attributes?.title || 'Unknown Thread';
+          const categorySlug = post?.attributes?.thread?.data?.attributes?.category?.data?.attributes?.slug || 'unknown';
+          const threadId = post?.attributes?.thread?.data?.id || '#';
+          const postContent = post?.attributes?.content || '';
+          const createdAt = post?.attributes?.createdAt ? new Date(post.attributes.createdAt) : new Date();
+
           // Strip HTML tags from content for plain text preview
-          const contentPreview = post.attributes.content
+          const contentPreview = postContent
             .replace(/<[^>]*>?/gm, '')
-            .substring(0, 100) + (post.attributes.content.length > 100 ? '...' : '');
+            .substring(0, 100) + (postContent.length > 100 ? '...' : '');
           
           return (
             <div key={post.id} className="p-6">
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
                   <div className="w-10 h-10 rounded-full bg-purple-200 dark:bg-purple-800 flex items-center justify-center text-purple-700 dark:text-purple-200 font-bold">
-                    {post.attributes.author.data.attributes.username.charAt(0).toUpperCase()}
+                    {username.charAt(0).toUpperCase()}
                   </div>
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <Link 
-                      href={`/users/${post.attributes.author.data.attributes.username}`}
+                      href={`/users/${username}`}
                       className="font-medium hover:underline"
                     >
-                      {post.attributes.author.data.attributes.username}
+                      {username}
                     </Link>
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {formatDistanceToNow(new Date(post.attributes.createdAt))} ago
+                      {formatDistanceToNow(createdAt)} ago
                     </span>
                   </div>
                   
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Posted in{' '}
                     <Link 
-                      href={`/forums/${post.attributes.thread.data.attributes.category.data.attributes.slug}/${post.attributes.thread.data.id}`}
+                      href={`/forums/${categorySlug}/${threadId}`}
                       className="text-purple-600 hover:underline"
                     >
-                      {post.attributes.thread.data.attributes.title}
+                      {threadTitle}
                     </Link>
                   </p>
                   
@@ -131,7 +166,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activity, isLoading, er
                   
                   <div className="mt-2">
                     <Link
-                      href={`/forums/${post.attributes.thread.data.attributes.category.data.attributes.slug}/${post.attributes.thread.data.id}#post-${post.id}`}
+                      href={`/forums/${categorySlug}/${threadId}#post-${post.id}`}
                       className="text-xs text-purple-600 hover:text-purple-800 font-medium hover:underline"
                     >
                       View full post →
